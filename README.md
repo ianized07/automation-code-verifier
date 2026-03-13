@@ -5,18 +5,25 @@ A web-based tool to analyze and verify Selenium automation code across multiple 
 ## Features
 
 - **Multi-Language Support:** Analyze Python, Java, JavaScript, and C# Selenium code
+- **Language Mismatch Detection:** Automatically detects when code is written in the wrong language (scores 0)
+- **Auto-Save Protection:** Code automatically saves every 3 seconds to prevent data loss from crashes or browser refresh
 - **Static Analysis:** Parse and validate code without executing it
+- **Lenient Scoring Approach:** Partial credit for minor issues, focused on practical candidate assessment
 - **Comprehensive Checks:**
-  - Syntax validation
-  - Import/package verification
+  - Syntax validation (continues analysis even with errors)
   - Selenium-specific patterns
   - Best practices validation
   - Anti-pattern detection
+  - Deprecated method detection (with modern syntax suggestions)
   - Resource management
   - Exception handling
   - Locator strategy analysis
-- **Detailed Reports:** Get line-by-line feedback with severity levels and improvement suggestions
-- **Code Quality Scoring:** 0-100 score based on issues found
+- **Detailed Reports:** 
+  - Line-by-line feedback with severity levels
+  - Detailed score breakdown showing all deductions
+  - Comprehensive issue listing with suggestions
+  - Transparent scoring calculation
+- **Code Quality Scoring:** 0-100 score with clear breakdown
 - **User-Friendly Interface:** Clean Streamlit UI with syntax highlighting
 - **Two-Mode System:**
   - **Candidate Mode:** Simple code editor for writing automation tests
@@ -28,11 +35,12 @@ A web-based tool to analyze and verify Selenium automation code across multiple 
 A clean, distraction-free code editor for candidates taking practical automation tests:
 - Language selection (Python, Java, JavaScript, C#)
 - Code editor with syntax highlighting
+- **Auto-save protection** - code saves every 3 seconds and restores on refresh
 - Download button to save code as text file
 - No analysis or scoring visible
 - Simple, focused interface
 
-**Use Case:** Give candidates a portable IDE to write their Selenium automation code without seeing assessment results.
+**Use Case:** Give candidates a portable IDE to write their Selenium automation code without seeing assessment results or losing work due to crashes.
 
 ### Assessor Mode
 Full-featured analysis interface for reviewing candidate submissions:
@@ -44,6 +52,36 @@ Full-featured analysis interface for reviewing candidate submissions:
 - Password protected to prevent unauthorized access
 
 **Use Case:** Assessors can paste candidate code and receive objective scoring and detailed feedback for evaluation.
+
+## Auto-Save Protection
+
+The application includes **automatic code saving** to prevent data loss:
+
+- **Auto-save interval:** Code saves to browser localStorage every 3 seconds
+- **Auto-restore:** Code automatically restores when page refreshes or crashes
+- **Before unload:** Code saves when closing tab/browser
+- **Visual indicator:** Auto-save status shown in sidebar
+- **No data loss:** Works even if internet connection drops temporarily
+
+This feature is especially important for candidates taking tests, ensuring their work is never lost due to:
+- Browser crashes
+- Accidental page refresh
+- Internet connectivity issues
+- Power outages
+- Tab closures
+
+## Language Mismatch Detection
+
+To prevent cheating or errors, the tool **automatically detects language mismatches**:
+
+- Java code submitted to Python analyzer → **Score: 0/100**
+- Python code submitted to Java analyzer → **Score: 0/100**
+- All cross-language submissions detected and rejected
+- Clear error message directing user to select correct language
+
+**Detection works across all 4 languages:** Python, Java, JavaScript, C#
+
+This prevents candidates from scoring high by selecting the wrong language to bypass strict validation.
 
 ## Installation
 
@@ -107,46 +145,66 @@ streamlit run app.py
 
 ## Scoring System
 
-The tool provides a **0-100 score** based on code quality, with strict penalties for invalid or incomplete Selenium code:
+The tool provides a **0-100 score** based on code quality with **lenient, partial credit** approach for practical candidate assessment:
 
 ### Score Ranges
-- **90-100:** Excellent - Production-ready code with best practices
-- **75-89:** Good - Minor improvements needed
-- **60-74:** Acceptable - Has issues but functional
-- **40-59:** Poor - Multiple problems, needs significant work
-- **20-39:** Very Poor - Critical issues, missing basics
-- **0-19:** Invalid - Syntax errors, not Selenium code, or gibberish
+- **85-100:** Excellent - Production-ready code with best practices
+- **70-84:** Good - Minor improvements needed
+- **55-69:** Acceptable - Has issues but demonstrates understanding
+- **40-54:** Needs Work - Multiple problems but shows effort
+- **20-39:** Poor - Significant issues or wrong language selected
+- **0-19:** Invalid - Wrong language or completely non-functional
 
-### Scoring Rules
-- **Syntax errors:** Score drops to 0 immediately
-- **Missing Selenium imports:** Score capped at 20 maximum
-- **No Selenium patterns detected:** Score capped at 30 maximum
-- **Missing imports + patterns:** Score capped at 10 maximum
-- **Critical issues:** -15 points each
-- **Warnings:** -8 points each
-- **Info/Suggestions:** -3 points each
+### Scoring Rules (Lenient Approach)
+- **Critical issues:** -10 points each
+- **Warnings:** -3 points each
+- **Info/Suggestions:** -2 points each
+- **Syntax errors:** -5 points (continues analysis)
+- **Wrong language selected:** Score = 0 (e.g., Java code in Python analyzer)
+- **Missing imports:** No penalty (ignored)
+- **Missing driver.quit():** Warning only (not critical)
 
-This strict scoring prevents random or invalid code from scoring high and ensures only legitimate Selenium automation receives passing grades.
+### Score Breakdown
+Every report includes a detailed breakdown showing:
+- Starting score: 100
+- All deductions by severity
+- Final calculated score
+- Transparent, verifiable scoring
+
+### Philosophy
+This **lenient scoring approach** gives partial credit for:
+- Deprecated methods (with suggestions for modern syntax)
+- Minor syntax variations
+- Case sensitivity issues
+- Missing cleanup code
+
+The goal is to assess practical Selenium knowledge, not penalize candidates for minor issues that modern IDEs would catch.
 
 ## What It Checks
 
-### Critical Issues (🔴)
-- Syntax errors
-- Missing required imports
-- WebDriver not properly closed (resource leaks)
-- Mismatched braces/parentheses
+### Critical Issues (🔴) - 10 points each
+- **Wrong language selected** (Java code in Python analyzer, etc.) - Score = 0
+- Code that doesn't match the selected language
 
-### Warnings (⚠️)
+### Warnings (⚠️) - 3 points each
+- Syntax errors (analysis continues)
 - Using hardcoded waits (`Thread.sleep`, `time.sleep`) instead of explicit waits
 - Missing exception handling
-- Deprecated locator methods
+- Missing `driver.quit()` cleanup
 - Implicit waits (prefer explicit waits)
+- Mismatched braces/parentheses
 
-### Informational (ℹ️)
+### Informational (ℹ️) - 2 points each
+- Deprecated methods (e.g., `findElementById`) with modern syntax suggestions
 - Complex/fragile XPath locators
 - Missing wait strategies
 - Code organization suggestions
 - Best practice recommendations
+
+### Not Penalized
+- Missing imports (ignored)
+- Case variations in method names
+- Minor formatting issues
 
 ## Supported Languages
 
@@ -197,38 +255,59 @@ automation-code-verifier/
 
 ## Example Analysis Output
 
-### Good Code (Score: 78/100)
+### Good Code with Minor Issues (Score: 85/100)
 ```
-✅ Overall Score: 78/100
+✅ Overall Score: 85/100
 
-🔴 CRITICAL ISSUES (1)
-  Line 15: Missing driver.quit() - Resource leak detected
+� Score Breakdown:
+  Starting Score: 100
+  Warnings (2 × -3): -6
+  Info/Suggestions (4 × -2): -8
+  Syntax Error Penalty: -5
+  ─────────────────────
+  Final Score: 85/100
 
 ⚠️  WARNINGS (2)
-  Line 12: Using Thread.sleep() instead of WebDriverWait
-  Line 25: Fragile XPath locator - consider using CSS or ID
+  Line 8: Syntax error detected: Expected ';' after statement
+  Line 12: Missing driver.quit() - Resource leak detected
 
-ℹ️  SUGGESTIONS (1)
-  Consider implementing Page Object Model pattern
+ℹ️  SUGGESTIONS (4)
+  Line 3: Using deprecated findElementById() method
+          Modern syntax: findElement(By.id("element_id"))
+  Line 15: Using Thread.sleep() instead of explicit waits
+  Line 25: XPath locator detected - may be fragile
+  Line 30: Consider implementing exception handling
 ```
 
-### Invalid Code (Score: 0/100)
+### Wrong Language Selected (Score: 0/100)
 ```
 ❌ Overall Score: 0/100
 
-🔴 SYNTAX ERROR
-  Line 1: invalid syntax
-
-Fix syntax errors before proceeding with analysis.
+🔴 CRITICAL ISSUES (1)
+  Line 1: Wrong language selected - this appears to be Java code
+  💡 Select 'Java' from the language dropdown and re-analyze
 ```
 
-### Non-Selenium Code (Score: 10/100)
+### Code with Deprecated Methods (Score: 88/100)
 ```
-⚠️ Overall Score: 10/100
+⚠️ Overall Score: 88/100
 
-🔴 CRITICAL ISSUES (2)
-  Line 1: Missing Selenium import
-  Line 1: No Selenium patterns detected - this doesn't appear to be automation code
+💯 Score Breakdown:
+  Starting Score: 100
+  Warnings (1 × -3): -3
+  Info/Suggestions (5 × -2): -10
+  ─────────────────────
+  Final Score: 87/100
+
+⚠️  WARNINGS (1)
+  Line 20: Missing exception handling around WebDriver operations
+
+ℹ️  SUGGESTIONS (5)
+  Line 5: Using deprecated findElementByXpath() method
+  Line 8: Using deprecated findElementById() method
+  Line 12: Using deprecated findElementByName() method
+  Line 18: XPath locator detected - may be fragile
+  Line 25: Consider adding driver.quit() in finally block
 ```
 
 ## Candidate Assessment Workflow
@@ -274,14 +353,15 @@ This tool is designed to streamline the automation candidate evaluation process:
 
 ## Future Enhancements
 
-- Save/load code snippets
 - Export analysis reports as PDF
 - Integration with GitHub repositories
 - Multi-file project analysis
-- Automated fix suggestions
+- Automated fix suggestions (one-click apply)
 - Code formatting tools
 - Performance analysis
 - Browser compatibility checks
+- Historical score tracking
+- Candidate comparison dashboard
 
 ## Contributing
 
