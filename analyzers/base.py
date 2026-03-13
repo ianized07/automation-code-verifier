@@ -39,19 +39,12 @@ class AnalysisResult:
     
     def finalize_score(self):
         """Apply final scoring adjustments based on Selenium patterns"""
-        # Lenient scoring: syntax errors don't immediately drop to 0
-        # Give partial credit for attempting to write Selenium code
+        # Lenient scoring: only apply small penalty for syntax errors
+        # Don't penalize for missing imports/patterns here - already handled by add_issue
         
         if not self.syntax_valid:
-            # Deduct 30 points for syntax issues but don't drop to 0
-            self.score = max(0, self.score - 30)
-        
-        # Less strict penalties for missing imports/patterns
-        if not self.has_selenium_imports:
-            self.score = max(0, self.score - 15)
-        
-        if not self.has_selenium_patterns:
-            self.score = max(0, self.score - 15)
+            # Small deduction for syntax issues - main penalty comes from warning
+            self.score = max(0, self.score - 10)
     
     def get_issues_by_severity(self, severity: str) -> List[Issue]:
         return [i for i in self.issues if i.severity == severity]
