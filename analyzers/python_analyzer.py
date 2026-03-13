@@ -60,12 +60,14 @@ class PythonAnalyzer(BaseAnalyzer):
         driver_initialized = False
         driver_quit = False
         has_try_except = False
+        has_selenium_patterns = False
         
         for i, line in enumerate(self.lines, 1):
             line_stripped = line.strip()
             
             if 'webdriver.' in line_stripped.lower() and '=' in line_stripped:
                 driver_initialized = True
+                has_selenium_patterns = True
             
             if 'driver.quit()' in line_stripped or 'driver.close()' in line_stripped:
                 driver_quit = True
@@ -97,6 +99,11 @@ class PythonAnalyzer(BaseAnalyzer):
                         "Complex XPath detected - may be fragile",
                         "Consider using CSS selectors or simpler XPath"
                     ))
+            
+            if 'find_element' in line_stripped.lower() or 'get(' in line_stripped:
+                has_selenium_patterns = True
+        
+        self.result.has_selenium_patterns = has_selenium_patterns or driver_initialized
         
         if driver_initialized and not driver_quit:
             self.result.add_issue(Issue(

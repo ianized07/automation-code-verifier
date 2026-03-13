@@ -42,6 +42,8 @@ class CSharpAnalyzer(BaseAnalyzer):
             if 'IWebDriver' in line_stripped or 'WebDriver' in line_stripped:
                 has_webdriver = True
         
+        self.result.has_selenium_imports = has_selenium
+        
         if not has_selenium:
             self.result.add_issue(Issue(
                 Issue.CRITICAL,
@@ -54,12 +56,14 @@ class CSharpAnalyzer(BaseAnalyzer):
         driver_initialized = False
         driver_quit = False
         has_try_catch = False
+        has_selenium_patterns = False
         
         for i, line in enumerate(self.lines, 1):
             line_stripped = line.strip()
             
             if 'IWebDriver' in line_stripped and '=' in line_stripped and 'new' in line_stripped:
                 driver_initialized = True
+                has_selenium_patterns = True
             
             if 'driver.Quit()' in line_stripped or 'driver.Close()' in line_stripped:
                 driver_quit = True
@@ -75,14 +79,17 @@ class CSharpAnalyzer(BaseAnalyzer):
                     "Use WebDriverWait with ExpectedConditions instead"
                 ))
             
-            if '.FindElement(' in line_stripped and 'XPath' in line_stripped:
-                if '//' in line_stripped:
+            if '.FindElement(' in line_stripped:
+                has_selenium_patterns = True
+                if 'XPath' in line_stripped and '//' in line_stripped:
                     self.result.add_issue(Issue(
                         Issue.INFO,
                         i,
                         "XPath locator detected - may be fragile",
                         "Consider using CSS selectors or ID locators"
                     ))
+        
+        self.result.has_selenium_patterns = has_selenium_patterns or driver_initialized
         
         if driver_initialized and not driver_quit:
             self.result.add_issue(Issue(

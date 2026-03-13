@@ -64,6 +64,29 @@ streamlit run app.py
    - Detailed line-by-line feedback
    - Suggestions for improvement
 
+## Scoring System
+
+The tool provides a **0-100 score** based on code quality, with strict penalties for invalid or incomplete Selenium code:
+
+### Score Ranges
+- **90-100:** Excellent - Production-ready code with best practices
+- **75-89:** Good - Minor improvements needed
+- **60-74:** Acceptable - Has issues but functional
+- **40-59:** Poor - Multiple problems, needs significant work
+- **20-39:** Very Poor - Critical issues, missing basics
+- **0-19:** Invalid - Syntax errors, not Selenium code, or gibberish
+
+### Scoring Rules
+- **Syntax errors:** Score drops to 0 immediately
+- **Missing Selenium imports:** Score capped at 20 maximum
+- **No Selenium patterns detected:** Score capped at 30 maximum
+- **Missing imports + patterns:** Score capped at 10 maximum
+- **Critical issues:** -15 points each
+- **Warnings:** -8 points each
+- **Info/Suggestions:** -3 points each
+
+This strict scoring prevents random or invalid code from scoring high and ensures only legitimate Selenium automation receives passing grades.
+
 ## What It Checks
 
 ### Critical Issues (🔴)
@@ -133,21 +156,38 @@ automation-code-verifier/
 
 ## Example Analysis Output
 
+### Good Code (Score: 78/100)
 ```
 ✅ Overall Score: 78/100
 
-🔴 CRITICAL ISSUES (2)
+🔴 CRITICAL ISSUES (1)
   Line 15: Missing driver.quit() - Resource leak detected
-  Line 8: No exception handling around WebDriver operations
 
-⚠️  WARNINGS (3)
+⚠️  WARNINGS (2)
   Line 12: Using Thread.sleep() instead of WebDriverWait
   Line 25: Fragile XPath locator - consider using CSS or ID
-  Line 30: Implicit wait set - prefer explicit waits
 
-ℹ️  SUGGESTIONS (2)
+ℹ️  SUGGESTIONS (1)
   Consider implementing Page Object Model pattern
-  Add meaningful comments for complex locator strategies
+```
+
+### Invalid Code (Score: 0/100)
+```
+❌ Overall Score: 0/100
+
+🔴 SYNTAX ERROR
+  Line 1: invalid syntax
+
+Fix syntax errors before proceeding with analysis.
+```
+
+### Non-Selenium Code (Score: 10/100)
+```
+⚠️ Overall Score: 10/100
+
+🔴 CRITICAL ISSUES (2)
+  Line 1: Missing Selenium import
+  Line 1: No Selenium patterns detected - this doesn't appear to be automation code
 ```
 
 ## Dependencies

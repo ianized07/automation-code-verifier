@@ -24,16 +24,33 @@ class AnalysisResult:
         self.score = 100
         self.syntax_valid = True
         self.syntax_error = None
+        self.has_selenium_imports = False
+        self.has_selenium_patterns = False
     
     def add_issue(self, issue: Issue):
         self.issues.append(issue)
         if issue.severity == Issue.CRITICAL:
-            self.score -= 10
+            self.score -= 15
         elif issue.severity == Issue.WARNING:
-            self.score -= 5
+            self.score -= 8
         elif issue.severity == Issue.INFO:
-            self.score -= 2
+            self.score -= 3
         self.score = max(0, self.score)
+    
+    def finalize_score(self):
+        """Apply final scoring adjustments based on Selenium patterns"""
+        if not self.syntax_valid:
+            self.score = 0
+            return
+        
+        if not self.has_selenium_imports:
+            self.score = min(self.score, 20)
+        
+        if not self.has_selenium_patterns:
+            self.score = min(self.score, 30)
+        
+        if not self.has_selenium_imports and not self.has_selenium_patterns:
+            self.score = min(self.score, 10)
     
     def get_issues_by_severity(self, severity: str) -> List[Issue]:
         return [i for i in self.issues if i.severity == severity]
@@ -78,10 +95,12 @@ class BaseAnalyzer(ABC):
     
     def analyze(self) -> AnalysisResult:
         if not self.validate_syntax():
+            self.result.finalize_score()
             return self.result
         
         self.check_imports()
         self.check_selenium_patterns()
         self.check_best_practices()
         
+        self.result.finalize_score()
         return self.result

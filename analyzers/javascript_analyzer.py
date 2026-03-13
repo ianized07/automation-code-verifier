@@ -38,6 +38,8 @@ class JavaScriptAnalyzer(BaseAnalyzer):
                 has_selenium = True
                 has_webdriver = True
         
+        self.result.has_selenium_imports = has_selenium
+        
         if not has_selenium:
             self.result.add_issue(Issue(
                 Issue.CRITICAL,
@@ -51,12 +53,14 @@ class JavaScriptAnalyzer(BaseAnalyzer):
         driver_quit = False
         has_try_catch = False
         has_async_await = False
+        has_selenium_patterns = False
         
         for i, line in enumerate(self.lines, 1):
             line_stripped = line.strip()
             
             if 'new Builder()' in line_stripped or '.build()' in line_stripped:
                 driver_initialized = True
+                has_selenium_patterns = True
             
             if 'driver.quit()' in line_stripped or 'driver.close()' in line_stripped:
                 driver_quit = True
@@ -75,13 +79,17 @@ class JavaScriptAnalyzer(BaseAnalyzer):
                     "Use driver.wait(until.elementLocated()) instead"
                 ))
             
-            if '.findElement(' in line_stripped and 'xpath' in line_stripped.lower():
-                self.result.add_issue(Issue(
-                    Issue.INFO,
-                    i,
-                    "XPath locator detected - may be fragile",
-                    "Consider using CSS selectors or ID locators"
-                ))
+            if '.findElement(' in line_stripped:
+                has_selenium_patterns = True
+                if 'xpath' in line_stripped.lower():
+                    self.result.add_issue(Issue(
+                        Issue.INFO,
+                        i,
+                        "XPath locator detected - may be fragile",
+                        "Consider using CSS selectors or ID locators"
+                    ))
+        
+        self.result.has_selenium_patterns = has_selenium_patterns or driver_initialized
         
         if driver_initialized and not driver_quit:
             self.result.add_issue(Issue(
