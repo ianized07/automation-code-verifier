@@ -32,7 +32,7 @@ class AnalysisResult:
         if issue.severity == Issue.CRITICAL:
             self.score -= 10
         elif issue.severity == Issue.WARNING:
-            self.score -= 5
+            self.score -= 3
         elif issue.severity == Issue.INFO:
             self.score -= 2
         self.score = max(0, self.score)
@@ -44,7 +44,7 @@ class AnalysisResult:
         
         if not self.syntax_valid:
             # Small deduction for syntax issues - main penalty comes from warning
-            self.score = max(0, self.score - 10)
+            self.score = max(0, self.score - 5)
     
     def get_issues_by_severity(self, severity: str) -> List[Issue]:
         return [i for i in self.issues if i.severity == severity]
