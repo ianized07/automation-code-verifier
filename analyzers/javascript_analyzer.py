@@ -7,6 +7,41 @@ class JavaScriptAnalyzer(BaseAnalyzer):
         return "JavaScript"
     
     def validate_syntax(self) -> bool:
+        # Check for language mismatch first
+        python_indicators = ['def ', 'import selenium', 'from selenium', 'if __name__']
+        java_indicators = ['public class', 'private ', 'import org.', 'new ChromeDriver()']
+        csharp_indicators = ['using OpenQA', 'IWebDriver', 'namespace ', 'public static void Main']
+        
+        if any(indicator in self.code for indicator in python_indicators):
+            self.result.add_issue(Issue(
+                Issue.CRITICAL,
+                1,
+                "Wrong language selected - this appears to be Python code",
+                "Select 'Python' from the language dropdown and re-analyze"
+            ))
+            self.result.score = 0
+            return False
+        
+        if any(indicator in self.code for indicator in java_indicators):
+            self.result.add_issue(Issue(
+                Issue.CRITICAL,
+                1,
+                "Wrong language selected - this appears to be Java code",
+                "Select 'Java' from the language dropdown and re-analyze"
+            ))
+            self.result.score = 0
+            return False
+        
+        if any(indicator in self.code for indicator in csharp_indicators):
+            self.result.add_issue(Issue(
+                Issue.CRITICAL,
+                1,
+                "Wrong language selected - this appears to be C# code",
+                "Select 'C#' from the language dropdown and re-analyze"
+            ))
+            self.result.score = 0
+            return False
+        
         try:
             import esprima
             esprima.parseScript(self.code)

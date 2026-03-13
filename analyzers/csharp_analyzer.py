@@ -7,6 +7,41 @@ class CSharpAnalyzer(BaseAnalyzer):
         return "C#"
     
     def validate_syntax(self) -> bool:
+        # Check for language mismatch first
+        python_indicators = ['def ', 'import selenium', 'from selenium', 'if __name__']
+        java_indicators = ['public class', 'import org.openqa', 'new ChromeDriver()']
+        js_indicators = ['const {', 'require(', 'async function', '=>', 'await driver']
+        
+        if any(indicator in self.code for indicator in python_indicators):
+            self.result.add_issue(Issue(
+                Issue.CRITICAL,
+                1,
+                "Wrong language selected - this appears to be Python code",
+                "Select 'Python' from the language dropdown and re-analyze"
+            ))
+            self.result.score = 0
+            return False
+        
+        if any(indicator in self.code for indicator in java_indicators):
+            self.result.add_issue(Issue(
+                Issue.CRITICAL,
+                1,
+                "Wrong language selected - this appears to be Java code",
+                "Select 'Java' from the language dropdown and re-analyze"
+            ))
+            self.result.score = 0
+            return False
+        
+        if any(indicator in self.code for indicator in js_indicators):
+            self.result.add_issue(Issue(
+                Issue.CRITICAL,
+                1,
+                "Wrong language selected - this appears to be JavaScript code",
+                "Select 'JavaScript' from the language dropdown and re-analyze"
+            ))
+            self.result.score = 0
+            return False
+        
         basic_checks = [
             (r'\bclass\s+\w+', "No class definition found"),
             (r'[{}\(\)]', "Missing braces or parentheses"),
