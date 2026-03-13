@@ -8,21 +8,22 @@ class ReportGenerator:
         summary = result.get_summary()
         
         lines.append(f"=== Analysis Report for {summary['language']} ===\n")
-        
-        if not result.syntax_valid:
-            lines.append(f"❌ SYNTAX ERROR: {result.syntax_error}\n")
-            lines.append("Fix syntax errors before proceeding with analysis.\n")
-            return '\n'.join(lines)
-        
-        lines.append(f"✅ Overall Score: {summary['score']}/100\n")
+        lines.append(f"{'✅' if summary['score'] >= 70 else '⚠️' if summary['score'] >= 40 else '❌'} Overall Score: {summary['score']}/100\n")
         
         if summary['total_issues'] == 0:
             lines.append("🎉 No issues found! Great job!\n")
             return '\n'.join(lines)
         
+        # Show all issues comprehensively
         critical = result.get_issues_by_severity(Issue.CRITICAL)
         warnings = result.get_issues_by_severity(Issue.WARNING)
         info = result.get_issues_by_severity(Issue.INFO)
+        
+        lines.append(f"\n📊 Summary:")
+        lines.append(f"  Total Issues: {summary['total_issues']}")
+        lines.append(f"  Critical: {summary['critical']}")
+        lines.append(f"  Warnings: {summary['warnings']}")
+        lines.append(f"  Info: {summary['info']}")
         
         if critical:
             lines.append(f"\n🔴 CRITICAL ISSUES ({len(critical)}):")
