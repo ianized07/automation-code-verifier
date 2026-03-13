@@ -18,6 +18,32 @@ A web-based tool to analyze and verify Selenium automation code across multiple 
 - **Detailed Reports:** Get line-by-line feedback with severity levels and improvement suggestions
 - **Code Quality Scoring:** 0-100 score based on issues found
 - **User-Friendly Interface:** Clean Streamlit UI with syntax highlighting
+- **Two-Mode System:**
+  - **Candidate Mode:** Simple code editor for writing automation tests
+  - **Assessor Mode:** Full analysis and scoring features (password protected)
+
+## Two-Mode System
+
+### Candidate Mode
+A clean, distraction-free code editor for candidates taking practical automation tests:
+- Language selection (Python, Java, JavaScript, C#)
+- Code editor with syntax highlighting
+- Download button to save code as text file
+- No analysis or scoring visible
+- Simple, focused interface
+
+**Use Case:** Give candidates a portable IDE to write their Selenium automation code without seeing assessment results.
+
+### Assessor Mode
+Full-featured analysis interface for reviewing candidate submissions:
+- All features from Candidate Mode
+- Code analysis with detailed scoring
+- Issue detection and categorization
+- Best practice recommendations
+- Line-by-line feedback with suggestions
+- Password protected to prevent unauthorized access
+
+**Use Case:** Assessors can paste candidate code and receive objective scoring and detailed feedback for evaluation.
 
 ## Installation
 
@@ -45,6 +71,8 @@ pip install -r requirements.txt
 
 ## Usage
 
+### Starting the Application
+
 1. Start the Streamlit application:
 ```bash
 streamlit run app.py
@@ -52,17 +80,30 @@ streamlit run app.py
 
 2. Open your browser (should open automatically at `http://localhost:8501`)
 
-3. Select your programming language from the dropdown
+### For Candidates (Candidate Mode - Default)
 
-4. Paste your Selenium automation code or click "Load Example" to see a sample
+1. The app opens in **Candidate Mode** by default
+2. Select your programming language from the dropdown
+3. Write your Selenium automation code in the editor
+4. Click **"Download Code"** when finished
+5. Submit the downloaded `.txt` file to your assessor
 
-5. Click "Analyze Code" to run the analysis
+**Note:** Analysis features are hidden in Candidate Mode to provide a clean coding environment.
 
+### For Assessors (Assessor Mode)
+
+1. Switch to **"Assessor Mode"** in the sidebar
+2. Enter the assessor password when prompted
+3. Select the programming language
+4. Paste the candidate's code or click "Load Example"
+5. Click **"Analyze Code"** to run the analysis
 6. Review the results:
    - Overall score (0-100)
    - Issue count by severity
    - Detailed line-by-line feedback
    - Suggestions for improvement
+
+**Tip:** You can lock/unlock Assessor Mode at any time using the button in the sidebar.
 
 ## Scoring System
 
@@ -189,6 +230,38 @@ Fix syntax errors before proceeding with analysis.
   Line 1: Missing Selenium import
   Line 1: No Selenium patterns detected - this doesn't appear to be automation code
 ```
+
+## Candidate Assessment Workflow
+
+This tool is designed to streamline the automation candidate evaluation process:
+
+### Setup
+1. Deploy the application (locally or on Streamlit Cloud)
+2. Share the URL with candidates
+
+### Candidate Test
+1. Candidate opens the app (automatically in Candidate Mode)
+2. Receives test scenario/requirements separately
+3. Writes Selenium automation code
+4. Downloads their code as a text file
+5. Submits the file
+
+### Assessment Review
+1. Assessor switches to Assessor Mode (password protected)
+2. Pastes candidate's code into the analyzer
+3. Reviews automated scoring and feedback:
+   - **Score 80+:** Strong candidate with solid fundamentals
+   - **Score 60-79:** Acceptable with areas for improvement
+   - **Score <60:** Significant issues or gaps in knowledge
+4. Uses detailed feedback for interview discussion points
+5. Makes hiring decision based on objective metrics + code review
+
+### Benefits
+- **Objective Scoring:** Consistent evaluation criteria across all candidates
+- **Time Savings:** Automated first-pass analysis before manual review
+- **Detailed Feedback:** Specific issues and improvement suggestions
+- **Prevents Cheating:** Candidates can't see scoring or analysis
+- **Portable Testing:** Web-based, no installation required for candidates
 
 ## Dependencies
 
