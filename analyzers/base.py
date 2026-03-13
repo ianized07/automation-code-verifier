@@ -1,0 +1,87 @@
+from abc import ABC, abstractmethod
+from typing import List, Dict, Any
+
+
+class Issue:
+    CRITICAL = "critical"
+    WARNING = "warning"
+    INFO = "info"
+    
+    def __init__(self, severity: str, line: int, message: str, suggestion: str = ""):
+        self.severity = severity
+        self.line = line
+        self.message = message
+        self.suggestion = suggestion
+    
+    def __repr__(self):
+        return f"Issue({self.severity}, line {self.line}: {self.message})"
+
+
+class AnalysisResult:
+    def __init__(self, language: str):
+        self.language = language
+        self.issues: List[Issue] = []
+        self.score = 100
+        self.syntax_valid = True
+        self.syntax_error = None
+    
+    def add_issue(self, issue: Issue):
+        self.issues.append(issue)
+        if issue.severity == Issue.CRITICAL:
+            self.score -= 10
+        elif issue.severity == Issue.WARNING:
+            self.score -= 5
+        elif issue.severity == Issue.INFO:
+            self.score -= 2
+        self.score = max(0, self.score)
+    
+    def get_issues_by_severity(self, severity: str) -> List[Issue]:
+        return [i for i in self.issues if i.severity == severity]
+    
+    def get_summary(self) -> Dict[str, Any]:
+        return {
+            'language': self.language,
+            'score': self.score,
+            'syntax_valid': self.syntax_valid,
+            'syntax_error': self.syntax_error,
+            'total_issues': len(self.issues),
+            'critical': len(self.get_issues_by_severity(Issue.CRITICAL)),
+            'warnings': len(self.get_issues_by_severity(Issue.WARNING)),
+            'info': len(self.get_issues_by_severity(Issue.INFO))
+        }
+
+
+class BaseAnalyzer(ABC):
+    def __init__(self, code: str):
+        self.code = code
+        self.lines = code.split('\n')
+        self.result = AnalysisResult(self.get_language_name())
+    
+    @abstractmethod
+    def get_language_name(self) -> str:
+        pass
+    
+    @abstractmethod
+    def validate_syntax(self) -> bool:
+        pass
+    
+    @abstractmethod
+    def check_imports(self):
+        pass
+    
+    @abstractmethod
+    def check_selenium_patterns(self):
+        pass
+    
+    def check_best_practices(self):
+        pass
+    
+    def analyze(self) -> AnalysisResult:
+        if not self.validate_syntax():
+            return self.result
+        
+        self.check_imports()
+        self.check_selenium_patterns()
+        self.check_best_practices()
+        
+        return self.result
