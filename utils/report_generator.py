@@ -19,7 +19,21 @@ class ReportGenerator:
         warnings = result.get_issues_by_severity(Issue.WARNING)
         info = result.get_issues_by_severity(Issue.INFO)
         
-        lines.append(f"\n📊 Summary:")
+        # Detailed score breakdown
+        lines.append(f"\n� Score Breakdown:")
+        lines.append(f"  Starting Score: 100")
+        if critical:
+            lines.append(f"  Critical Issues ({len(critical)} × -10): -{len(critical) * 10}")
+        if warnings:
+            lines.append(f"  Warnings ({len(warnings)} × -5): -{len(warnings) * 5}")
+        if info:
+            lines.append(f"  Info/Suggestions ({len(info)} × -2): -{len(info) * 2}")
+        if not result.syntax_valid:
+            lines.append(f"  Syntax Error Penalty: -10")
+        lines.append(f"  ─────────────────────")
+        lines.append(f"  Final Score: {summary['score']}/100")
+        
+        lines.append(f"\n�📊 Issues Summary:")
         lines.append(f"  Total Issues: {summary['total_issues']}")
         lines.append(f"  Critical: {summary['critical']}")
         lines.append(f"  Warnings: {summary['warnings']}")
