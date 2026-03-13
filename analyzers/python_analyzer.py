@@ -8,6 +8,43 @@ class PythonAnalyzer(BaseAnalyzer):
         return "Python"
     
     def validate_syntax(self) -> bool:
+        # Check for language mismatch first
+        java_indicators = ['public class', 'private ', 'WebDriver driver', 'new ChromeDriver', 'import org.', ';']
+        csharp_indicators = ['using OpenQA', 'IWebDriver', 'namespace ', 'public static void Main']
+        js_indicators = ['const {', 'require(', 'async function', 'await driver']
+        
+        code_lower = self.code.lower()
+        
+        if any(indicator in self.code for indicator in java_indicators):
+            self.result.add_issue(Issue(
+                Issue.CRITICAL,
+                1,
+                "Wrong language selected - this appears to be Java code",
+                "Select 'Java' from the language dropdown and re-analyze"
+            ))
+            self.result.score = 0
+            return False
+        
+        if any(indicator in self.code for indicator in csharp_indicators):
+            self.result.add_issue(Issue(
+                Issue.CRITICAL,
+                1,
+                "Wrong language selected - this appears to be C# code",
+                "Select 'C#' from the language dropdown and re-analyze"
+            ))
+            self.result.score = 0
+            return False
+        
+        if any(indicator in self.code for indicator in js_indicators):
+            self.result.add_issue(Issue(
+                Issue.CRITICAL,
+                1,
+                "Wrong language selected - this appears to be JavaScript code",
+                "Select 'JavaScript' from the language dropdown and re-analyze"
+            ))
+            self.result.score = 0
+            return False
+        
         try:
             ast.parse(self.code)
             self.result.syntax_valid = True

@@ -7,6 +7,41 @@ class JavaAnalyzer(BaseAnalyzer):
         return "Java"
     
     def validate_syntax(self) -> bool:
+        # Check for language mismatch first
+        python_indicators = ['def ', 'import selenium', 'from selenium', 'if __name__']
+        csharp_indicators = ['using OpenQA', 'IWebDriver', 'namespace ']
+        js_indicators = ['const {', 'require(', 'async function', '=>']
+        
+        if any(indicator in self.code for indicator in python_indicators):
+            self.result.add_issue(Issue(
+                Issue.CRITICAL,
+                1,
+                "Wrong language selected - this appears to be Python code",
+                "Select 'Python' from the language dropdown and re-analyze"
+            ))
+            self.result.score = 0
+            return False
+        
+        if any(indicator in self.code for indicator in csharp_indicators):
+            self.result.add_issue(Issue(
+                Issue.CRITICAL,
+                1,
+                "Wrong language selected - this appears to be C# code",
+                "Select 'C#' from the language dropdown and re-analyze"
+            ))
+            self.result.score = 0
+            return False
+        
+        if any(indicator in self.code for indicator in js_indicators):
+            self.result.add_issue(Issue(
+                Issue.CRITICAL,
+                1,
+                "Wrong language selected - this appears to be JavaScript code",
+                "Select 'JavaScript' from the language dropdown and re-analyze"
+            ))
+            self.result.score = 0
+            return False
+        
         # Lenient syntax check - don't fail on minor issues
         try:
             import javalang
