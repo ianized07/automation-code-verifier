@@ -11,8 +11,57 @@ st.set_page_config(
     layout="wide"
 )
 
+# Initialize session state for mode
+if 'mode' not in st.session_state:
+    st.session_state['mode'] = 'candidate'
+if 'authenticated' not in st.session_state:
+    st.session_state['authenticated'] = False
+
+# Password for Assessor Mode
+ASSESSOR_PASSWORD = "radiant2026"
+
 st.title("🔍 Automation Code Verifier")
-st.markdown("**Analyze and verify Selenium automation code for issues and best practices**")
+
+# Mode selector in sidebar
+with st.sidebar:
+    st.title("🎯 Mode Selection")
+    
+    mode_selection = st.radio(
+        "Select Mode:",
+        options=["Candidate Mode", "Assessor Mode"],
+        index=0 if st.session_state['mode'] == 'candidate' else 1
+    )
+    
+    if mode_selection == "Candidate Mode":
+        st.session_state['mode'] = 'candidate'
+        st.session_state['authenticated'] = False
+        st.info("📝 **Candidate Mode**\n\nWrite your Selenium automation code here. No analysis features available.")
+    else:
+        if not st.session_state['authenticated']:
+            password_input = st.text_input("Enter Assessor Password:", type="password", key="password_input")
+            if st.button("Unlock Assessor Mode"):
+                if password_input == ASSESSOR_PASSWORD:
+                    st.session_state['authenticated'] = True
+                    st.session_state['mode'] = 'assessor'
+                    st.success("✅ Authenticated! Assessor Mode unlocked.")
+                    st.rerun()
+                else:
+                    st.error("❌ Incorrect password")
+        else:
+            st.session_state['mode'] = 'assessor'
+            st.success("✅ **Assessor Mode Active**\n\nFull analysis features available.")
+            if st.button("Lock Assessor Mode"):
+                st.session_state['authenticated'] = False
+                st.session_state['mode'] = 'candidate'
+                st.rerun()
+    
+    st.divider()
+
+# Display mode-specific description
+if st.session_state['mode'] == 'candidate':
+    st.markdown("**✍️ Write your Selenium automation code below**")
+else:
+    st.markdown("**Analyze and verify Selenium automation code for issues and best practices**")
 
 LANGUAGE_MAP = {
     "Python": {
@@ -126,18 +175,28 @@ class SeleniumTest
     }
 }
 
-col1, col2 = st.columns([2, 1])
-
-with col1:
-    language = st.selectbox(
-        "Select Programming Language",
-        options=list(LANGUAGE_MAP.keys()),
-        index=0
-    )
-
-with col2:
-    if st.button("Load Example", use_container_width=True):
-        st.session_state['code_input'] = LANGUAGE_MAP[language]['example']
+# Language selection
+if st.session_state['mode'] == 'candidate':
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        language = st.selectbox(
+            "Select Programming Language",
+            options=list(LANGUAGE_MAP.keys()),
+            index=0
+        )
+    with col2:
+        st.write("")
+else:
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        language = st.selectbox(
+            "Select Programming Language",
+            options=list(LANGUAGE_MAP.keys()),
+            index=0
+        )
+    with col2:
+        if st.button("Load Example", use_container_width=True):
+            st.session_state['code_input'] = LANGUAGE_MAP[language]['example']
 
 code_input = st.text_area(
     "Enter your Selenium automation code:",
@@ -147,15 +206,39 @@ code_input = st.text_area(
     key='code_area'
 )
 
-col_analyze, col_clear = st.columns([3, 1])
-
-with col_analyze:
-    analyze_button = st.button("🔍 Analyze Code", type="primary", use_container_width=True)
-
-with col_clear:
-    if st.button("Clear", use_container_width=True):
-        st.session_state['code_input'] = ''
-        st.rerun()
+# Mode-specific buttons
+if st.session_state['mode'] == 'candidate':
+    col_submit, col_clear = st.columns([3, 1])
+    
+    with col_submit:
+        if st.button("📥 Download Code", type="primary", use_container_width=True):
+            if code_input.strip():
+                st.download_button(
+                    label="💾 Save as .txt file",
+                    data=code_input,
+                    file_name=f"selenium_code_{language.lower()}.txt",
+                    mime="text/plain",
+                    use_container_width=True
+                )
+            else:
+                st.warning("Please write some code first")
+    
+    with col_clear:
+        if st.button("Clear", use_container_width=True):
+            st.session_state['code_input'] = ''
+            st.rerun()
+    
+    analyze_button = False
+else:
+    col_analyze, col_clear = st.columns([3, 1])
+    
+    with col_analyze:
+        analyze_button = st.button("🔍 Analyze Code", type="primary", use_container_width=True)
+    
+    with col_clear:
+        if st.button("Clear", use_container_width=True):
+            st.session_state['code_input'] = ''
+            st.rerun()
 
 if analyze_button and code_input.strip():
     with st.spinner(f"Analyzing {language} code..."):
@@ -231,8 +314,33 @@ if analyze_button and code_input.strip():
 elif analyze_button and not code_input.strip():
     st.warning("Please enter some code to analyze.")
 
-st.sidebar.title("ℹ️ About")
-st.sidebar.markdown("""
+# Sidebar info based on mode
+if st.session_state['mode'] == 'candidate':
+    st.sidebar.title("ℹ️ Instructions")
+    st.sidebar.markdown("""
+**Candidate Mode** - Code Editor
+
+### Supported Languages
+- 🐍 Python
+- ☕ Java
+- 🟨 JavaScript
+- #️⃣ C#
+
+### How to Use
+1. Select your programming language
+2. Write your Selenium automation code
+3. Click "Download Code" when finished
+4. Submit the downloaded file
+
+### Tips
+- Write clean, readable code
+- Use proper indentation
+- Add comments where needed
+- Test your logic before submitting
+""")
+else:
+    st.sidebar.title("ℹ️ About")
+    st.sidebar.markdown("""
 **Automation Code Verifier** is a tool to analyze Selenium automation code across multiple languages.
 
 ### Supported Languages
