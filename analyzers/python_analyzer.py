@@ -40,21 +40,9 @@ class PythonAnalyzer(BaseAnalyzer):
             if 'WebDriverWait' in line_stripped or 'expected_conditions' in line_stripped:
                 has_wait = True
         
-        if not has_selenium:
-            self.result.add_issue(Issue(
-                Issue.CRITICAL,
-                1,
-                "Missing Selenium import",
-                "Add: from selenium import webdriver"
-            ))
-        
-        if not has_webdriver and has_selenium:
-            self.result.add_issue(Issue(
-                Issue.WARNING,
-                1,
-                "WebDriver not imported",
-                "Consider importing: from selenium.webdriver"
-            ))
+        # User preference: ignore missing imports
+        # Just track for pattern detection
+        pass
     
     def check_selenium_patterns(self):
         driver_initialized = False

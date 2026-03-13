@@ -40,13 +40,9 @@ class JavaScriptAnalyzer(BaseAnalyzer):
         
         self.result.has_selenium_imports = has_selenium
         
-        if not has_selenium:
-            self.result.add_issue(Issue(
-                Issue.WARNING,
-                1,
-                "Missing Selenium WebDriver import statement",
-                "Recommended: const {Builder, By, until} = require('selenium-webdriver');"
-            ))
+        # User preference: ignore missing imports
+        # Just track for pattern detection
+        pass
     
     def check_selenium_patterns(self):
         driver_initialized = False

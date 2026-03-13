@@ -55,13 +55,9 @@ class CSharpAnalyzer(BaseAnalyzer):
         
         self.result.has_selenium_imports = has_selenium
         
-        if not has_selenium:
-            self.result.add_issue(Issue(
-                Issue.WARNING,
-                1,
-                "Missing Selenium using statement",
-                "Recommended: using OpenQA.Selenium;"
-            ))
+        # User preference: ignore missing imports
+        # Just track for pattern detection
+        pass
     
     def check_selenium_patterns(self):
         driver_initialized = False
