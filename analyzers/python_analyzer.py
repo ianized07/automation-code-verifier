@@ -107,10 +107,10 @@ class PythonAnalyzer(BaseAnalyzer):
         
         if driver_initialized and not driver_quit:
             self.result.add_issue(Issue(
-                Issue.CRITICAL,
+                Issue.WARNING,
                 len(self.lines),
                 "WebDriver not properly closed (missing driver.quit())",
-                "Add driver.quit() in a finally block to prevent resource leaks"
+                "Recommended: Add driver.quit() in a finally block to prevent resource leaks"
             ))
         
         if driver_initialized and not has_try_except:

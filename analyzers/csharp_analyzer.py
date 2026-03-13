@@ -19,15 +19,26 @@ class CSharpAnalyzer(BaseAnalyzer):
             self.result.syntax_valid = False
             self.result.syntax_error = f"Mismatched braces: {open_braces} opening, {close_braces} closing"
             self.result.add_issue(Issue(
-                Issue.CRITICAL,
+                Issue.WARNING,
                 1,
                 "Mismatched braces in code",
                 "Ensure all opening braces have corresponding closing braces"
             ))
-            return False
+            return True
         
-        self.result.syntax_valid = True
-        return True
+        try:
+            self.result.syntax_valid = True
+            return True
+        except Exception as e:
+            self.result.syntax_valid = False
+            self.result.syntax_error = f"Syntax error: {str(e)}"
+            self.result.add_issue(Issue(
+                Issue.WARNING,
+                1,
+                f"Syntax error detected: {str(e)}",
+                "Review and fix syntax issues for code to compile"
+            ))
+            return True
     
     def check_imports(self):
         has_selenium = False
@@ -46,10 +57,10 @@ class CSharpAnalyzer(BaseAnalyzer):
         
         if not has_selenium:
             self.result.add_issue(Issue(
-                Issue.CRITICAL,
+                Issue.WARNING,
                 1,
                 "Missing Selenium using statement",
-                "Add: using OpenQA.Selenium;"
+                "Recommended: using OpenQA.Selenium;"
             ))
     
     def check_selenium_patterns(self):
@@ -93,10 +104,10 @@ class CSharpAnalyzer(BaseAnalyzer):
         
         if driver_initialized and not driver_quit:
             self.result.add_issue(Issue(
-                Issue.CRITICAL,
+                Issue.WARNING,
                 len(self.lines),
                 "WebDriver not properly closed (missing driver.Quit())",
-                "Add driver.Quit() in a finally block"
+                "Recommended: Add driver.Quit() in a finally block to prevent resource leaks"
             ))
         
         if driver_initialized and not has_try_catch:

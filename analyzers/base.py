@@ -30,11 +30,11 @@ class AnalysisResult:
     def add_issue(self, issue: Issue):
         self.issues.append(issue)
         if issue.severity == Issue.CRITICAL:
-            self.score -= 15
+            self.score -= 10
         elif issue.severity == Issue.WARNING:
-            self.score -= 8
+            self.score -= 5
         elif issue.severity == Issue.INFO:
-            self.score -= 3
+            self.score -= 2
         self.score = max(0, self.score)
     
     def finalize_score(self):

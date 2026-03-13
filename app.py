@@ -56,6 +56,11 @@ with st.sidebar:
                 st.rerun()
     
     st.divider()
+    
+    # Auto-save status
+    st.markdown("**💾 Auto-Save Status**")
+    st.markdown('<div id="autosave-status" style="color: #10b981; font-size: 0.9em;">Enabled</div>', unsafe_allow_html=True)
+    st.caption("Your code is automatically saved every 3 seconds and will be restored if the page crashes or refreshes.")
 
 # Display mode-specific description
 if st.session_state['mode'] == 'candidate':

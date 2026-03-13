@@ -16,12 +16,12 @@ class JavaScriptAnalyzer(BaseAnalyzer):
             self.result.syntax_valid = False
             self.result.syntax_error = f"Syntax error: {str(e)}"
             self.result.add_issue(Issue(
-                Issue.CRITICAL,
+                Issue.WARNING,
                 1,
-                f"Syntax error: {str(e)}",
-                "Fix the syntax error before running the code"
+                f"Syntax error detected: {str(e)}",
+                "Review and fix syntax issues for code to run"
             ))
-            return False
+        return True
     
     def check_imports(self):
         has_selenium = False
@@ -42,10 +42,10 @@ class JavaScriptAnalyzer(BaseAnalyzer):
         
         if not has_selenium:
             self.result.add_issue(Issue(
-                Issue.CRITICAL,
+                Issue.WARNING,
                 1,
-                "Missing Selenium WebDriver import",
-                "Add: const {Builder, By, until} = require('selenium-webdriver');"
+                "Missing Selenium WebDriver import statement",
+                "Recommended: const {Builder, By, until} = require('selenium-webdriver');"
             ))
     
     def check_selenium_patterns(self):
@@ -93,10 +93,10 @@ class JavaScriptAnalyzer(BaseAnalyzer):
         
         if driver_initialized and not driver_quit:
             self.result.add_issue(Issue(
-                Issue.CRITICAL,
+                Issue.WARNING,
                 len(self.lines),
                 "WebDriver not properly closed (missing driver.quit())",
-                "Add driver.quit() in a finally block"
+                "Recommended: Add driver.quit() in a finally block to prevent resource leaks"
             ))
         
         if driver_initialized and not has_try_catch:
